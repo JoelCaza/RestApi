@@ -1,6 +1,5 @@
 ﻿using RestApi.Entidades;
 using RestApi.Negocio;
-using RestApi.Servicios;
 
 namespace RestApi.Web;
 

@@ -3,7 +3,7 @@
 using MySqlConnector;
 using RestApi.Entidades;
 
-public class PlatoRepositorio(IConfiguration config)
+public class PlatoRepositorio(IConfiguration config) : IPlatoRepositorio
 {
     private readonly string _cn = config.GetConnectionString("Restaurante")!;
 
@@ -41,7 +41,7 @@ public class PlatoRepositorio(IConfiguration config)
         await using var cn = new MySqlConnection(_cn);
         await cn.OpenAsync();
         await using var cmd = new MySqlCommand(
-            "DELETE FROM Platos WHERE Id = @id", cn);
+            "UPDATE Platos SET Disponible = 0 WHERE Id = @id AND Disponible = 1", cn);
         cmd.Parameters.AddWithValue("@id", id);
         return await cmd.ExecuteNonQueryAsync();
     }
@@ -55,7 +55,7 @@ public class PlatoRepositorio(IConfiguration config)
         LeerAsync(SelectConCategoria + " WHERE p.Disponible = 1 ORDER BY c.Nombre, p.Nombre");
 
     public async Task<Plato?> ObtenerPorIdAsync(int id) =>
-        (await LeerAsync(SelectConCategoria + " WHERE p.Id = @id", ("@id", id))).FirstOrDefault();
+        (await LeerAsync(SelectConCategoria + " WHERE p.Id = @id AND p.Disponible = 1", ("@id", id))).FirstOrDefault();
 
     public Task<List<Plato>> ObtenerPorCategoriaAsync(int categoriaId) =>
         LeerAsync(SelectConCategoria + " WHERE p.CategoriaId = @cat AND p.Disponible = 1 ORDER BY p.Nombre",
